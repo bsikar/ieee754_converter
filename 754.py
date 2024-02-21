@@ -299,7 +299,7 @@ def ieee754_base2_to_base2(bin_num):
         else:
             frac_part_bin += "0"
 
-    simplified_bin = f"{int_part_bin}.{frac_part_bin}"
+    simplified_bin = "{}.{}".format(int_part_bin, frac_part_bin)
     return simplified_bin
 
 
