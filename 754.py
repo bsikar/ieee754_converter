@@ -4,108 +4,127 @@ MSB                                  LSB
 """
 
 from math import log2, floor, ceil
-import random
 
 
-def base10_to_ieee754(number):
+def base10_to_ieee754(number, loud=True):
     number = float(number)
-    print("Input number: {}".format(number))
+    if loud:
+        print("Input number: {}".format(number))
 
     sign_bit = 0 if number >= 0 else 1
-    print("-> 1. Sign bit: {}".format(sign_bit))
+    if loud:
+        print("-> 1. Sign bit: {}".format(sign_bit))
 
     """ START SPECIAL CASE """
     # Special Case 1: Number is 0
     if number == 0:
-        print("[Number is 0]")
+        if loud:
+            print("[Number is 0]")
         # Handle special case for 0
         return "00000000" + "0" * 23
 
     # Special Case 2: Number is inf
     if number == float("inf"):
-        print("[Number is +inf]")
+        if loud:
+            print("[Number is +inf]")
         # Handle special case for +infinity
         return "01111111" + "0" * 23
 
     # Special Case 3: Number is -inf
     if number == float("-inf"):
-        print("[Number is -inf]")
+        if loud:
+            print("[Number is -inf]")
         # Handle special case for -infinity
         return "11111111" + "0" * 23
 
     # Special Case 4: Number is NaN
     if number != number:
-        print("[Number is NaN]")
+        if loud:
+            print("[Number is NaN]")
         # Handle special case for NaN
         return "01111111" + "1" * 22 + "0"
     """ END SPECIAL CASE """
 
     abs_number = abs(number)
-    print("-> 2. Absolute Value: {}".format(abs_number))
+    if loud:
+        print("-> 2. Absolute Value: {}".format(abs_number))
     # Special Case 5: Number is subnormal
     if abs_number < (2**-126):
-        print("[Number is subnormal]")
+        if loud:
+            print("[Number is subnormal]")
         exponent = 0
-        print("-> 3. Exponent: 0")
+        if loud:
+            print("-> 3. Exponent: 0")
         mantissa = abs_number * (2 ** (23 + 126))
-        print("-> 4. Mantissa: {} * (2^(23 + 126)) = {}".format(abs_number, mantissa))
+        if loud:
+            print(
+                "-> 4. Mantissa: {} * (2^(23 + 126)) = {}".format(abs_number, mantissa)
+            )
     # General Case : Normalized
     else:
-        print("[Number is normalized]")
+        if loud:
+            print("[Number is normalized]")
         exponent_real = log2(abs_number)
-        print("-> 3. Exponent:")
-        print("-> 3a. log2({}) = {}".format(abs_number, exponent_real))
+        if loud:
+            print("-> 3. Exponent:")
+            print("-> 3a. log2({}) = {}".format(abs_number, exponent_real))
         exponent_floor = floor(exponent_real)
-        print("-> 3b. floor({}) = {}".format(exponent_real, exponent_floor))
+        if loud:
+            print("-> 3b. floor({}) = {}".format(exponent_real, exponent_floor))
         exponent_127 = 127 + exponent_floor
-        print("-> 3c. 127 + {} = {}".format(exponent_floor, exponent_127))
+        if loud:
+            print("-> 3c. 127 + {} = {}".format(exponent_floor, exponent_127))
         exponent_bin = "{:08b}".format(exponent_127).replace("0b", "")
-        print(
-            "Exponent = {} -> {} -> {} -> {} {}".format(
-                exponent_real,
-                exponent_floor,
-                exponent_127,
-                exponent_bin[:4],
-                exponent_bin[4:],
+        if loud:
+            print(
+                "Exponent = {} -> {} -> {} -> {} {}".format(
+                    exponent_real,
+                    exponent_floor,
+                    exponent_127,
+                    exponent_bin[:4],
+                    exponent_bin[4:],
+                )
             )
-        )
-        mantissa = ceil((abs_number / (2**exponent_floor) - 1) * (2**23))
-        print(
-            "-> 4. Mantissa: ceil(({} / (2^{}) - 1) * (2^23)) = {}".format(
-                abs_number, exponent_floor, mantissa
+        mantissa = round((abs_number / (2**exponent_floor) - 1) * (2**23))
+        if loud:
+            print(
+                "-> 4. Mantissa: round(({} / (2^{}) - 1) * (2^23)) = {}".format(
+                    abs_number, exponent_floor, mantissa
+                )
             )
-        )
 
     mantissa_bin = "{:023b}".format(int(mantissa))
-    print(
-        "Mantissa = {} {} {} {} {} {} {} {}".format(
-            mantissa_bin[:3],
-            mantissa_bin[3:7],
-            mantissa_bin[7:11],
-            mantissa_bin[11:15],
-            mantissa_bin[15:19],
-            mantissa_bin[19:23],
-            mantissa_bin[23:27],
-            mantissa_bin[27:],
+    if loud:
+        print(
+            "Mantissa = {} {} {} {} {} {} {} {}".format(
+                mantissa_bin[:3],
+                mantissa_bin[3:7],
+                mantissa_bin[7:11],
+                mantissa_bin[11:15],
+                mantissa_bin[15:19],
+                mantissa_bin[19:23],
+                mantissa_bin[23:27],
+                mantissa_bin[27:],
+            )
         )
-    )
 
     # Combine sign bit, exponent, and mantissa to get IEEE 754 representation
     ieee754_binary = "{}{}{}".format(sign_bit, exponent_bin, mantissa_bin)
-    print("IEEE754: ", end="")
-    for i in range(0, len(ieee754_binary), 4):
-        print(ieee754_binary[i : i + 4], end=" ")
-    print()
+    if loud:
+        print("IEEE754: ", end="")
+        for i in range(0, len(ieee754_binary), 4):
+            print(ieee754_binary[i : i + 4], end=" ")
+        print()
 
     return ieee754_binary, hex(int(ieee754_binary, 2))
 
 
-def base16_to_ieee754(hex_num):
+def base16_to_ieee754(hex_num, loud=True):
     decimal_num = float.fromhex(hex_num)
-    return base10_to_ieee754(decimal_num)
+    return base10_to_ieee754(decimal_num, loud)
 
 
-def base2_to_ieee754(bin_num):
+def base2_to_ieee754(bin_num, loud=True):
     # Split the binary number into the whole and fractional parts
     parts = bin_num.split(".")
     whole_part = int(parts[0], 2) if parts[0] else 0
@@ -115,7 +134,7 @@ def base2_to_ieee754(bin_num):
         for i, digit in enumerate(parts[1]):
             fractional_part += int(digit) * (2 ** (-(i + 1)))
     decimal_num = whole_part + fractional_part
-    return base10_to_ieee754(decimal_num)
+    return base10_to_ieee754(decimal_num, loud)
 
 
 def ieee754_base16_to_base10(hex_num):
@@ -305,13 +324,13 @@ def ieee754_base2_to_base2(bin_num):
 
 def run():
     while True:
-        print("\nMenu:")
-        print("1. Base10 to IEEE754")
-        print("2. Base16 to IEEE754")
-        print("3. Base2 to IEEE754")
-        print("4. IEEE754 to Base10")
-        print("5. IEEE754 to Base16")
-        print("6. IEEE754 to Base2")
+        print("\nMenu (doesn't support 2s complement):")
+        print("1. Base10 (simple) to IEEE754")
+        print("2. Base16 (simple) to IEEE754")
+        print("3. Base2  (simple) to IEEE754")
+        print("4. IEEE754 to Base10 (simple)")
+        print("5. IEEE754 to Base16 (simple)")
+        print("6. IEEE754 to Base2  (simple)")
         print("7. Quit")
         choice = input("Enter your choice: ")
 
@@ -352,5 +371,124 @@ def run():
             print("Invalid choice. Please try again.")
 
 
+def _test_base10_to_ieee754():
+    # base10_to_ieee754
+    def base10_to_ieee754_test(number):
+        # Convert the number to IEEE 754 binary representation using struct
+        ieee754_bytes = struct.pack(">f", number)
+        ieee754_bits = "".join(f"{byte:08b}" for byte in ieee754_bytes)
+
+        # Convert the IEEE 754 binary representation to hexadecimal
+        ieee754_hex = "".join(f"{byte:02x}" for byte in ieee754_bytes)
+
+        return (ieee754_bits, "0x" + ieee754_hex)
+
+    numbers = np.linspace(-1e10, 1e10, num=int(1e5))
+    test_results = list(
+        zip(
+            numbers,
+            [base10_to_ieee754_test(number) for number in numbers],
+        )
+    )
+
+    fun_results = list(
+        zip(
+            numbers,
+            [base10_to_ieee754(number, False) for number in numbers],
+        )
+    )
+
+    # Assert and print failed cases
+    failed_cases = []
+    for test_case, fun_case in zip(test_results, fun_results):
+        if test_case[1] != fun_case[1]:
+            failed_cases.append((test_case[0], test_case[1], fun_case[1]))
+
+    if failed_cases:
+        print("Failed Cases:")
+        for case in failed_cases:
+            print(f"Number: {case[0]}, Expected: {case[1]}, Got: {case[2]}")
+
+
+def _test_base16_to_ieee754():
+    def base16_to_ieee754_test(hex_value):
+        # Convert the simplified floating-point hex to decimal
+        decimal_value = float.fromhex(hex_value)
+
+        # Convert the decimal value to IEEE 754 binary representation using struct
+        ieee754_bytes = struct.pack(">f", decimal_value)
+        ieee754_bits = "".join(f"{byte:08b}" for byte in ieee754_bytes)
+
+        # Convert the IEEE 754 binary representation to hexadecimal
+        ieee754_hex = "".join(f"{byte:02x}" for byte in ieee754_bytes)
+
+        return (ieee754_bits, "0x" + ieee754_hex)
+
+    def float_to_custom_hex(value):
+        # Split the value into integer and fractional parts
+        integer_part, fractional_part = divmod(abs(value), 1)
+
+        # Convert integer part to hexadecimal
+        integer_hex = format(int(integer_part), "X")
+
+        # Treat the fractional part by scaling (this is a simplification)
+        fractional_hex = format(int(fractional_part * 1e6), "X")
+
+        # Combine with a sign and decimal-like point
+        hex_string = f"{'-' if value < 0 else ''}{integer_hex}.{fractional_hex}"
+
+        return hex_string
+
+    values = np.linspace(-1e10, 1e10, num=int(1e5))
+
+    # Convert to custom hex-like strings
+    hex_values = [float_to_custom_hex(value) for value in values]
+
+    # Test results using base16_to_ieee754_test
+    test_results = [
+        (hex_value, base16_to_ieee754_test(hex_value)) for hex_value in hex_values
+    ]
+
+    # Test results using base16_to_ieee754
+    fun_results = [
+        (hex_value, base16_to_ieee754(hex_value, False)) for hex_value in hex_values
+    ]
+
+    # Assert and print failed cases
+    failed_cases = []
+    for test_case, fun_case in zip(test_results, fun_results):
+        if test_case[1] != fun_case[1]:
+            failed_cases.append((test_case[0], test_case[1], fun_case[1]))
+
+    if failed_cases:
+        print("Failed Cases:")
+        for case in failed_cases:
+            print(
+                f"Simplified Hex Value: {case[0]}, Expected: {case[1]}, Got: {case[2]}"
+            )
+
+
+def run_tests():
+    _test_base10_to_ieee754()
+    _test_base16_to_ieee754()
+    # _test_base2_to_ieee754()
+
+    # ieee754_base2_to_base2
+
+    # ieee754_base2_to_base10
+
+    # ieee754_base2_to_base16
+
+    # ieee754_base16_to_base2
+
+    # ieee754_base16_to_base10
+
+    # ieee754_base16_to_base16
+
+
 if __name__ == "__main__":
+    import numpy as np
+    import struct
+
+    run_tests()
     run()
