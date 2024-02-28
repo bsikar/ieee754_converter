@@ -1,3 +1,4 @@
+
 """
 Sign Bit + 8 bits Exponent + 23 bits Mantissa
 MSB                                  LSB
@@ -50,8 +51,8 @@ def base10_to_ieee754(number):
         exponent = 0
         print("-> 3. Exponent: 0")
         input("Press Enter to continue...")
-        mantissa = abs_number * (2 ** (23 + 126))
-        print("-> 4. Mantissa: {} * (2^(23 + 126)) = {}".format(abs_number, mantissa))
+        mantissa = round(1.0 * abs_number * (2 ** (23 + 126)))
+        print("-> 4. Mantissa: round({} * (2^(23 + 126))) = {}".format(abs_number, mantissa))
         input("Press Enter to continue...")
         exponent_bin = "{:08b}".format(exponent).replace("0b", "")
     # General Case : Normalized
@@ -194,3 +195,4 @@ def run():
 
 
 run()
+
